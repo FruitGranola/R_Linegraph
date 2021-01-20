@@ -1723,6 +1723,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div id="legendの位置を自由に指定する場合" class="section level2">
 <h2>legendの位置を自由に指定する場合</h2>
+<p>legendをグラフの中に置いたほうが見やすいという人もいる。 その場合、<code>legend.position = c(x, y)</code>でlegendの位置を指定する。</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>data <span class="op">%&gt;%</span><span class="st"> </span></span>
 <span id="cb10-2"><a href="#cb10-2"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> year, <span class="dt">y =</span> smd,</span>
 <span id="cb10-3"><a href="#cb10-3"></a>             <span class="dt">group =</span> party_jpn,</span>

@@ -157,13 +157,14 @@ data %>%
 このままだとありもしない1995年のデータがあるように見えないだろうか？
 それに衆院選は5年刻みではない。
 そういうときは`as.factor()`で連続変数ではなく、因子型と指定すれば良いだろう。
+また、`paste()`を使えば単位を付けることが可能だ。
 もし、それで順番がぐちゃぐちゃになったら、因子型にする前に`arrange()`で順番を変えれば良いはず...(たぶん)
 
 ```{r}
 set.seed(1)
 
 data %>% 
-  mutate(year = as.factor(year)) %>% 
+  mutate(year = paste(as.factor(year), "年", sep = "")) %>% 
   ggplot(aes(x = year,
              y = smd,
              group = party_jpn,

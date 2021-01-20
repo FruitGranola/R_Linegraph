@@ -1,0 +1,204 @@
+---
+title: "データの可視化（折れ線グラフ）"
+date: "`r Sys.Date()`"
+author: Sort
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    self_contained: true
+---
+
+```{r, include=FALSE}
+library(rmdformats)
+
+knitr::opts_chunk$set(warning = F,
+                      message = F,
+                      comment = "",
+                      fig.align = "center")
+```
+
+この記事のコードをまとめたものは[Github](https://github.com/FruitGranola?tab=repositories)にあります。
+
+# 使用するパッケージ
+
+```{r}
+library(tidyverse)
+library(magrittr)
+```
+
+# ggplot2 の theme をあらかじめ設定しておく
+
+```{r}
+theme_set(theme_minimal(base_size = 15))
+```
+
+# 使用するデータ
+
+```{r}
+data <- read_csv("Data/House_of_Councilors_1996_2017.csv")
+```
+
+# データ内の変数名を確認する
+
+```{r}
+names(data)
+```
+
+# 折れ線グラフに使いやすい形にデータを整える
+
+```{r}
+data %<>% 
+  group_by(year, party_jpn) %>% # 年ごと、各政党ごとに処理を行う
+  summarise(smd = sum(smd)) %>%  # 各政党の当選者数を計算
+  filter(party_jpn %in% c("自民党", "民主党", "公明党", "共産党")) # 政党を絞る
+```
+
+# 折れ線グラフ
+
+## なんの変哲もない折れ線グラフ
+
+```{r}
+data %>% 
+  ggplot(aes(x = year, y = smd,
+             group = party_jpn,
+             color = party_jpn)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "", y = "当選者数", 
+       title = "参院選: 各政党の当選者数の推移",
+       color = "政党")
+```
+
+## 政党ごとにpointの形を変える
+
+線を色ごとに変えたほうが視認性が高いが、モノクロで資料を作らなければならない時もある。
+その場合は、pointの形を変えると良い。また、線の形を変えても良いだろう。
+個人的にはpointの形を変えたほうが視認性が高いと思う。
+ちなみに、pointの形を変える場合は`size =`でpointを大きくしたほうが見やすい。
+
+ちなみに、折れ線グラフのlegendはbottomの方が良いという声もある。
+legendをbottomにするときは`labs()`で`x = NULL`としたほうが見栄えが良い。
+
+```{r}
+data %>% 
+  ggplot(aes(x = year, y = smd, 
+             group = party_jpn)) +
+  geom_point(aes(shape = party_jpn),
+             size = 4) +
+  geom_line() +
+  labs(x = NULL, y = "当選者数",
+       title = "参院選: 各政党の当選者数の推移",
+       shape = NULL) +
+  theme(legend.title = element_blank(),
+        legend.position = "bottom")
+```
+
+## 政党ごとにlineの形を変える
+
+```{r}
+data %>% 
+  ggplot(aes(x = year, y = smd, 
+             group = party_jpn)) +
+  geom_point() +
+  geom_line(aes(linetype = party_jpn)) +
+  labs(x = NULL, y = "当選者数",
+       title = "参院選: 各政党の当選者数の推移",
+       linetype = NULL) +
+  theme(legend.position = "bottom")
+```
+
+## legendの位置を自由に指定する場合
+
+```{r}
+data %>% 
+  ggplot(aes(x = year, y = smd,
+             group = party_jpn,
+             color = party_jpn)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "", y = "当選者数", 
+       title = "参院選: 各政党の当選者数の推移",
+       color = "政党") +
+  theme(legend.title = element_blank(), 
+        legend.position = c(0.1, 0.5))
+```
+
+## pointの付近に値を載せたい
+
+数値の動きが分かっても、実際の数値が分からない。そんな時は`ggrepel`だ。
+`geom_text_repel()`を使えば、適当にいい感じにpointに被らずに数値を載せることができる。
+また、数値の載せ方はランダムであるため、`set.seed()`で乱数を固定したほうが良いだろう。
+
+```{r}
+library(ggrepel)
+
+set.seed(1)
+
+data %>% 
+  ggplot(aes(x = year, y = smd,
+             group = party_jpn,
+             color = party_jpn)) +
+  geom_point() +
+  geom_line() +
+  labs(x = NULL, y = "当選者数", 
+       title = "参院選: 各政党の当選者数の推移",
+       color = "政党") +
+  geom_text_repel(aes(label = smd), show.legend = F) +
+  theme(legend.title = element_blank(),
+        legend.position = "bottom")
+```
+
+## x軸のメモリを調整したい
+
+気にしない人もいるだろうが、pointとメモリの間隔が気に入らない。
+このままだとありもしない1995年のデータがあるように見えないだろうか？
+それに衆院選は5年刻みではない。
+そういうときは`as.factor()`で連続変数ではなく、因子型と指定すれば良いだろう。
+もし、それで順番がぐちゃぐちゃになったら、因子型にする前に`arrange()`で順番を変えれば良いはず...(たぶん)
+
+```{r}
+set.seed(1)
+
+data %>% 
+  mutate(year = as.factor(year)) %>% 
+  ggplot(aes(x = year,
+             y = smd,
+             group = party_jpn,
+             color = party_jpn)) +
+  geom_point() +
+  geom_line() +
+  labs(x = NULL, y = "当選者数", 
+       title = "参院選: 各政党の当選者数の推移",
+       color = "政党") +
+  geom_text_repel(aes(label = smd), show.legend = F) +
+  theme(legend.title = element_blank(),
+        legend.position = "bottom") 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

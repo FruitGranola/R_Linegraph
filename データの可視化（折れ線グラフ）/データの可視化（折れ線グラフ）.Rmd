@@ -109,6 +109,9 @@ data %>%
 
 ## legendの位置を自由に指定する場合
 
+legendをグラフの中に置いたほうが見やすいという人もいる。
+その場合、`legend.position = c(x, y)`でlegendの位置を指定する。
+
 ```{r}
 data %>% 
   ggplot(aes(x = year, y = smd,

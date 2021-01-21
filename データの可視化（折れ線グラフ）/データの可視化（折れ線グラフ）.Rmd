@@ -2,15 +2,10 @@
 title: "データの可視化（折れ線グラフ）"
 date: "`r Sys.Date()`"
 author: Sort
-output:
-  rmdformats::readthedown:
-    highlight: kate
-    self_contained: true
+output: html_document
 ---
 
 ```{r, include=FALSE}
-library(rmdformats)
-
 knitr::opts_chunk$set(warning = F,
                       message = F,
                       comment = "",
@@ -197,7 +192,7 @@ data %>%
              color = party_jpn)) +
   geom_point() +
   geom_line() +
-  gghighlight(party_jpn %in% c("自民党", "民主党"))
+  gghighlight(party_jpn %in% c("自民党", "民主党")) +
   labs(x = NULL, y = "当選者数", 
        title = "参院選: 各政党の当選者数の推移",
        color = "政党") +

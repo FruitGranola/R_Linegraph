@@ -179,9 +179,31 @@ data %>%
         legend.position = "bottom") 
 ```
 
+## 線のハイライト
 
+今回は4つの政党だけを抽出し、可視化しているため見やすい。
+しかし、より多くの折れ線を可視化する際には視認性が失われる。
+そんな時は、より重要なものにのみ色を付けることで、視認性の高い折れ線グラフを作成できる。
+`gghighlight`は`gghighlight(x %in% c("hoge", "hoge"))`で重要な個体を強調できる。
 
+```{r}
+library(gghighlight)
 
+data %>% 
+  mutate(year = paste(as.factor(year), "年", sep = "")) %>% 
+  ggplot(aes(x = year,
+             y = smd,
+             group = party_jpn,
+             color = party_jpn)) +
+  geom_point() +
+  geom_line() +
+  gghighlight(party_jpn %in% c("自民党", "民主党"))
+  labs(x = NULL, y = "当選者数", 
+       title = "参院選: 各政党の当選者数の推移",
+       color = "政党") +
+  theme(legend.title = element_blank(),
+        legend.position = "bottom") 
+```
 
 
 
